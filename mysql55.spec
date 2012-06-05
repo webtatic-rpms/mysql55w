@@ -1,5 +1,5 @@
 Name: mysql55
-Version: 5.5.24
+Version: 5.5.25
 Release: 1%{?dist}
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -554,6 +554,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Jun 05 2012 Andy Thompson <andy@webtatic.com> 5.5.25-1
+- Update to MySQL 5.5.25
+
 * Fri May 11 2012 Andy Thompson <andy@webtatic.com> 5.5.24-1
 - Update to MySQL 5.5.24
 
