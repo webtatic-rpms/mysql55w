@@ -31,7 +31,7 @@ Source999: filter-requires-mysql.sh
 
 Patch1: mysql-5.5.8-install-layout.patch
 Patch2: mysql-5.5.8-errno.patch
-Patch3: mysql-chain-certs.patch
+Patch3: mysql-5.5.28-chain-certs.patch
 Patch4: mysql-5.5.8-readline.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
