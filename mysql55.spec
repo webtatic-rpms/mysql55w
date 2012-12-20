@@ -5,7 +5,7 @@ Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
 # exceptions allow client libraries to be linked with most open source SW,
-# not only GPL code.
+# not only GPL code.  See README.mysql-license
 License: GPLv2 with exceptions
 
 # Regression tests take a long time, you can skip 'em with this
@@ -25,24 +25,41 @@ Source3: my.cnf
 Source4: scriptstub.c
 Source5: my_config.h
 Source6: README.mysql-docs
+Source7: README.mysql-license
+Source8: libmysql.version
 Source9: mysql-embedded-check.c
+Source14: rh-skipped-tests-base.list
 # Working around perl dependency checking bug in rpm FTTB. Remove later.
 Source999: filter-requires-mysql.sh
 
-Patch1: mysql-5.5.8-install-layout.patch
-Patch2: mysql-5.5.8-errno.patch
-Patch3: mysql-5.5.28-chain-certs.patch
-Patch4: mysql-5.5.8-readline.patch
+# Comments for these patches are in the patch files.
+Patch1: mysql-errno.patch
+Patch2: mysql-strmov.patch
+Patch3: mysql-install-test.patch
+Patch4: mysql-expired-certs.patch
+Patch5: mysql-stack-guard.patch
+Patch6: mysql-chain-certs.patch
+Patch7: mysql-versioning.patch
+Patch8: mysql-dubious-exports.patch
+Patch10: mysql-plugin-bool.patch
+Patch11: mysql-s390-tsc.patch
+Patch13: mysqld-nowatch.patch
+Patch14: mysql-va-list.patch
+Patch15: mysql-netdevname.patch
+Patch16: mysql-logrotate.patch
+Patch17: mysql-plugin-test.patch
+Patch18: mysql-cipherspec.patch
+Patch19: mysql-file-contents.patch
+Patch20: mysql-string-overflow.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: gperf, perl, readline-devel, openssl-devel
-BuildRequires: gcc-c++, ncurses-devel, zlib-devel
-BuildRequires: gawk cmake
-BuildRequires: libaio-devel
+BuildRequires: perl, readline-devel, openssl-devel
+BuildRequires: gcc-c++, cmake, ncurses-devel, zlib-devel, libaio-devel
+BuildRequires: systemtap-sdt-devel
 # make test requires time and ps
 BuildRequires: time procps
-# Socket is needed to run regression tests
-BuildRequires: perl(Socket)
+# Socket and Time::HiRes are needed to run regression tests
+BuildRequires: perl(Socket), perl(Time::HiRes)
 
 Requires: grep, fileutils
 Requires: %{name}-libs = %{version}-%{release}
@@ -54,8 +71,9 @@ Conflicts: MySQL
 Conflicts: mysql < %{version}
 Provides: mysql = %{version}
 
-# Working around perl dependency checking bug in rpm FTTB. Remove later.
+# When rpm 4.9 is universal, this could be cleaned up:
 %global __perl_requires %{SOURCE999}
+%global __perllib_requires %{SOURCE999}
 
 %description
 MySQL is a multi-user, multi-threaded SQL database server. MySQL is a
@@ -174,13 +192,33 @@ the MySQL sources.
 %prep
 %setup -q -n mysql-%{version}
 
-%patch1 -p1 -b .install-layout
-%patch2 -p1 -b .errno
-%patch3 -p1 -b .chain-certs
-%patch4 -p1 -b .readline
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
+%patch8 -p1
+%patch10 -p1
+%patch11 -p1
+%patch13 -p1
+%patch14 -p1
+%patch15 -p1
+%patch16 -p1
+%patch17 -p1
+%patch18 -p1
+%patch19 -p1
+%patch20 -p1
 
 # workaround for upstream bug #56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
+
+# upstream has fallen down badly on symbol versioning, do it ourselves
+cp %{SOURCE8} libmysql/libmysql.version
+
+# generate a list of tests that fail, but are not disabled by upstream
+cat %{SOURCE14} > mysql-test/rh-skipped-tests.list
 
 %build
 
@@ -205,44 +243,55 @@ CFLAGS="$CFLAGS -fPIC"
 %ifarch sparc sparcv9 sparc64
 CFLAGS=`echo $CFLAGS| sed -e "s|-O2|-O1|g" `
 %endif
-# extra C++ flags as per recommendations in mysql's INSTALL-SOURCE doc
-# CXXFLAGS="$CFLAGS -felide-constructors -fno-rtti -fno-exceptions"
+CXXFLAGS="$CFLAGS"
 export CFLAGS CXXFLAGS
 
-%cmake . \
-	-DBUILD_CONFIG=mysql_release -DINSTALL_LAYOUT=RPM \
-	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
-	-DWITH_READLINE:BOOL=OFF \
-	-DWITH_LIBEDIT:BOOL=OFF \
-	-DWITH_SSL:STRING=system \
-	-DWITH_DEBUG:BOOL=OFF \
-	-DWITH_EMBEDDED_SERVER:BOOL=ON \
-	-DMYSQL_DATADIR:PATH=/var/lib/mysql \
+# The INSTALL_xxx macros have to be specified relative to CMAKE_INSTALL_PREFIX
+# so we can't use %%{_datadir} and so forth here.
+
+cmake . -DBUILD_CONFIG=mysql_release \
+	-DFEATURE_SET="community" \
+	-DINSTALL_LAYOUT=RPM \
+	-DCMAKE_INSTALL_PREFIX="%{_prefix}" \
+	-DINSTALL_INCLUDEDIR=include/mysql \
+	-DINSTALL_INFODIR=share/info \
+	-DINSTALL_LIBDIR="%{_lib}/mysql" \
+	-DINSTALL_MANDIR=share/man \
+	-DINSTALL_MYSQLSHAREDIR=share/mysql \
+	-DINSTALL_MYSQLTESTDIR=share/mysql-test \
+	-DINSTALL_PLUGINDIR="%{_lib}/mysql/plugin" \
+	-DINSTALL_SBINDIR=libexec \
+	-DINSTALL_SCRIPTDIR=bin \
+	-DINSTALL_SQLBENCHDIR=share \
+	-DINSTALL_SUPPORTFILESDIR=share/mysql \
+	-DMYSQL_DATADIR="/var/lib/mysql" \
 	-DMYSQL_UNIX_ADDR="/var/lib/mysql/mysql.sock" \
-	-DWITH_EXTRA_CHARSETS:STRING=all \
-	-DWITH_INNOBASE_STORAGE_ENGINE:BOOL=ON \
-	-DWITH_PARTITION_STORAGE_ENGINE:BOOL=ON \
-	-DENABLED_LOCAL_INFILE:BOOL=ON
+	-DENABLED_LOCAL_INFILE=ON \
+	-DENABLE_DTRACE=ON \
+	-DWITH_EMBEDDED_SERVER=ON \
+	-DWITH_READLINE=ON \
+	-DWITH_SSL=system \
+	-DWITH_ZLIB=system
 
 gcc $CFLAGS $LDFLAGS -o scriptstub "-DLIBDIR=\"%{_libdir}/mysql\"" %{SOURCE4}
 
-make VERBOSE=1 %{?_smp_mflags}
+make %{?_smp_mflags} VERBOSE=1
 
 # regular build will make libmysqld.a but not libmysqld.so :-(
 mkdir libmysqld/work
 cd libmysqld/work
 ar -x ../libmysqld.a
+# these result in missing dependencies: (filed upstream as bug 59104)
+rm -f sql_binlog.cc.o rpl_utility.cc.o
 gcc $CFLAGS $LDFLAGS -shared -Wl,-soname,libmysqld.so.0 -o libmysqld.so.0.0.1 \
-	*.o \
-	-lpthread -lcrypt -lnsl -lssl -lcrypto -lz -lrt -lstdc++ -lm -lc
+	*.o ../../probes_mysql.o \
+	-lpthread -laio -lcrypt -lssl -lcrypto -lz -lrt -lstdc++ -ldl -lm -lc
 # this is to check that we built a complete library
-# cp %{SOURCE9} .
+cp %{SOURCE9} .
 ln -s libmysqld.so.0.0.1 libmysqld.so.0
-# gcc -I../../include $CFLAGS mysql-embedded-check.c libmysqld.so.0
-# LD_LIBRARY_PATH=. ldd ./a.out
+gcc -I../../include $CFLAGS mysql-embedded-check.c libmysqld.so.0
+LD_LIBRARY_PATH=. ldd ./a.out
 cd ../..
-
-make abi_check_all
 
 %if %runselftest
   # hack to let 32- and 64-bit tests run concurrently on same build machine
@@ -256,19 +305,35 @@ make abi_check_all
   esac
   export MTR_BUILD_THREAD
 
-  pushd mysql-test
-  %{__perl} ./mysql-test-run.pl \
-    --ssl \
-    --mysqld=--binlog-format=mixed \
-    --suite-timeout=720 \
-    --testcase-timeout=30
-  popd
+  make test
+
+  # The cmake build scripts don't provide any simple way to control the
+  # options for mysql-test-run, so ignore the make target and just call it
+  # manually.  Nonstandard options chosen are:
+  # --force to continue tests after a failure
+  # no retries please
+  # test SSL with --ssl
+  # skip tests that are listed in rh-skipped-tests.list
+  # avoid redundant test runs with --binlog-format=mixed
+  # increase timeouts to prevent unwanted failures during mass rebuilds
+  (
+    cd mysql-test
+    perl ./mysql-test-run.pl --force --retry=0 --ssl \
+	--skip-test-list=rh-skipped-tests.list \
+	--mysqld=--binlog-format=mixed \
+	--suite-timeout=720 --testcase-timeout=30
+    # cmake build scripts will install the var cruft if left alone :-(
+    rm -rf var
+  )
 %endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR=$RPM_BUILD_ROOT install
+
+# List the installed tree for RPM package maintenance purposes.
+find $RPM_BUILD_ROOT -print | sed "s|^$RPM_BUILD_ROOT||" | sort > ROOTFILES
 
 # multilib header hacks
 # we only apply this to known Red Hat multilib arches, per bug #181335
@@ -281,62 +346,94 @@ case `uname -i` in
     ;;
 esac
 
+# cmake generates some completely wacko references to -lprobes_mysql when
+# building with dtrace support.  Haven't found where to shut that off,
+# so resort to this blunt instrument.  While at it, let's not reference
+# libmysqlclient_r anymore either.
+sed -e 's/-lprobes_mysql//' -e 's/-lmysqlclient_r/-lmysqlclient/' \
+	${RPM_BUILD_ROOT}%{_bindir}/mysql_config >mysql_config.tmp
+cp -f mysql_config.tmp ${RPM_BUILD_ROOT}%{_bindir}/mysql_config
+chmod 755 ${RPM_BUILD_ROOT}%{_bindir}/mysql_config
+
+# install INFO_SRC, INFO_BIN into libdir (upstream thinks these are doc files,
+# but that's pretty wacko --- see also mysql-file-contents.patch)
+install -m 644 Docs/INFO_SRC ${RPM_BUILD_ROOT}%{_libdir}/mysql/
+install -m 644 Docs/INFO_BIN ${RPM_BUILD_ROOT}%{_libdir}/mysql/
+
 mkdir -p $RPM_BUILD_ROOT/var/log
 touch $RPM_BUILD_ROOT/var/log/mysqld.log
-
-# List the installed tree for RPM package maintenance purposes.
-find $RPM_BUILD_ROOT -print | sed "s|^$RPM_BUILD_ROOT||" | sort > ROOTFILES
 
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 mkdir -p $RPM_BUILD_ROOT/var/run/mysqld
 install -m 0755 -d $RPM_BUILD_ROOT/var/lib/mysql
 install -m 0755 %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mysqld
+
+mkdir -p $RPM_BUILD_ROOT/etc
 install -m 0644 %{SOURCE3} $RPM_BUILD_ROOT/etc/my.cnf
 
+# Fix funny permissions that cmake build scripts apply to config files
+chmod 644 ${RPM_BUILD_ROOT}%{_datadir}/mysql/config.*.ini
+
+# Fix scripts for multilib safety
 mv ${RPM_BUILD_ROOT}%{_bindir}/mysqlbug ${RPM_BUILD_ROOT}%{_libdir}/mysql/mysqlbug
 install -m 0755 scriptstub ${RPM_BUILD_ROOT}%{_bindir}/mysqlbug
 mv ${RPM_BUILD_ROOT}%{_bindir}/mysql_config ${RPM_BUILD_ROOT}%{_libdir}/mysql/mysql_config
 install -m 0755 scriptstub ${RPM_BUILD_ROOT}%{_bindir}/mysql_config
 
+# Remove libmysqld.a, install libmysqld.so
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqld.a
 install -m 0755 libmysqld/work/libmysqld.so.0.0.1 ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqld.so.0.0.1
 ln -s libmysqld.so.0.0.1 ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqld.so.0
 ln -s libmysqld.so.0 ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqld.so
 
-rm -f ${RPM_BUILD_ROOT}%{_bindir}/comp_err
-rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/comp_err.1*
-rm -f ${RPM_BUILD_ROOT}%{_bindir}/make_win_binary_distribution
-rm -f ${RPM_BUILD_ROOT}%{_bindir}/make_win_src_distribution
-rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/make_win_bin_dist.1*
-rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/make_win_src_distribution.1*
-rm -f ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqlclient*.la
+# libmysqlclient_r is no more.  Upstream tries to replace it with symlinks
+# but that really doesn't work (wrong soname in particular).  We'll keep
+# just the devel libmysqlclient_r.so link, so that rebuilding without any
+# source change is enough to get rid of dependency on libmysqlclient_r.
+rm -f ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqlclient_r.so*
+ln -s libmysqlclient.so ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqlclient_r.so
+
+# mysql-test includes one executable that doesn't belong under /usr/share,
+# so move it and provide a symlink
+mv ${RPM_BUILD_ROOT}%{_datadir}/mysql-test/lib/My/SafeProcess/my_safe_process ${RPM_BUILD_ROOT}%{_bindir}
+ln -s ../../../../../bin/my_safe_process ${RPM_BUILD_ROOT}%{_datadir}/mysql-test/lib/My/SafeProcess/my_safe_process
+
+# Remove files that %%doc will install in preferred location
+rm -f ${RPM_BUILD_ROOT}/usr/COPYING
+rm -f ${RPM_BUILD_ROOT}/usr/README
+
+# Remove files we don't want installed at all
+rm -f ${RPM_BUILD_ROOT}/usr/INSTALL-BINARY
+rm -f ${RPM_BUILD_ROOT}/usr/docs/ChangeLog
+rm -f ${RPM_BUILD_ROOT}/usr/data/mysql/.empty
+rm -f ${RPM_BUILD_ROOT}/usr/data/test/.empty
+# should move this to /etc/ ?
+rm -f ${RPM_BUILD_ROOT}%{_bindir}/mysqlaccess.conf
+rm -f ${RPM_BUILD_ROOT}%{_bindir}/mysql_embedded
 rm -f ${RPM_BUILD_ROOT}%{_libdir}/mysql/*.a
-rm -f ${RPM_BUILD_ROOT}%{_libdir}/mysql/plugin/*.la
-rm -f ${RPM_BUILD_ROOT}%{_libdir}/mysql/plugin/*.a
 rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/binary-configure
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/make_binary_distribution
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/make_sharedlib_distribution
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/mi_test_all*
+rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/magic
 rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/ndb-config-2-node.ini
 rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/mysql.server
 rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/mysqld_multi.server
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/MySQL-shared-compat.spec
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/*.plist
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/preinstall
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/postinstall
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/mysql-*.spec
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/mysql-log-rotate
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/ChangeLog
+rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/comp_err.1*
 rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/mysql-stress-test.pl.1*
 rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/mysql-test-run.pl.1*
-rm -f ${RPM_BUILD_ROOT}%{_bindir}/mysqlaccess.conf
-rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/magic
+
+# put logrotate script where it needs to be
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
+mv ${RPM_BUILD_ROOT}%{_datadir}/mysql/mysql-log-rotate $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/mysqld
+chmod 644 $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/mysqld
 
 mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
 echo "%{_libdir}/mysql" > $RPM_BUILD_ROOT/etc/ld.so.conf.d/%{name}-%{_arch}.conf
 
 # copy additional docs into build tree so %%doc will find them
 cp %{SOURCE6} README.mysql-docs
+cp %{SOURCE7} README.mysql-license
+
+# install the list of skipped tests to be available for user runs
+install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/mysql-test
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -375,7 +472,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc README COPYING
+%doc README COPYING README.mysql-license
 %doc README.mysql-docs
 
 %{_bindir}/msql2mysql
@@ -404,18 +501,16 @@ fi
 %{_mandir}/man1/mysqlslap.1*
 %{_mandir}/man1/my_print_defaults.1*
 
-%{_libdir}/mysql/mysqlbug
 %{_libdir}/mysql/mysql_config
 
 %files libs
 %defattr(-,root,root)
-%doc COPYING
+%doc README COPYING README.mysql-license
 # although the default my.cnf contains only server settings, we put it in the
 # libs package because it can be used for client settings too.
 %config(noreplace) /etc/my.cnf
 %dir %{_libdir}/mysql
-%{_libdir}/mysql/libmysqlclient*.so.*
-%{_libdir}/mysql/libmysqlservices.*
+%{_libdir}/mysql/libmysqlclient.so.*
 /etc/ld.so.conf.d/*
 
 %dir %{_datadir}/mysql
@@ -475,6 +570,11 @@ fi
 
 /usr/libexec/mysqld
 
+%{_libdir}/mysql/INFO_SRC
+%{_libdir}/mysql/INFO_BIN
+
+%{_libdir}/mysql/mysqlbug
+
 %{_libdir}/mysql/plugin
 
 %{_mandir}/man1/msql2mysql.1*
@@ -521,23 +621,24 @@ fi
 %attr(0755,mysql,mysql) %dir /var/run/mysqld
 %attr(0755,mysql,mysql) %dir /var/lib/mysql
 %attr(0640,mysql,mysql) %config(noreplace) %verify(not md5 size mtime) /var/log/mysqld.log
+%config(noreplace) %{_sysconfdir}/logrotate.d/mysqld
 
 %files devel
 %defattr(-,root,root)
 /usr/include/mysql
 /usr/share/aclocal/mysql.m4
-%{_libdir}/mysql/libmysqlclient*.so
+%{_libdir}/mysql/libmysqlclient.so
+%{_libdir}/mysql/libmysqlclient_r.so
 
 %files embedded
 %defattr(-,root,root)
-%doc COPYING
+%doc README COPYING README.mysql-license
 %{_libdir}/mysql/libmysqld.so.*
 
 %files embedded-devel
 %defattr(-,root,root)
 %{_libdir}/mysql/libmysqld.so
 %{_bindir}/mysql_client_test_embedded
-%{_bindir}/mysql_embedded
 %{_bindir}/mysqltest_embedded
 %{_mandir}/man1/mysql_client_test_embedded.1*
 %{_mandir}/man1/mysqltest_embedded.1*
@@ -549,6 +650,7 @@ fi
 %files test
 %defattr(-,root,root)
 %{_bindir}/mysql_client_test
+%{_bindir}/my_safe_process
 %attr(-,mysql,mysql) %{_datadir}/mysql-test
 
 %{_mandir}/man1/mysql_client_test.1*
