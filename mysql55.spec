@@ -60,8 +60,17 @@ BuildRequires: gcc-c++, cmake, ncurses-devel, zlib-devel, libaio-devel
 BuildRequires: systemtap-sdt-devel
 # make test requires time and ps
 BuildRequires: time procps
-# Socket and Time::HiRes are needed to run regression tests
-BuildRequires: perl(Socket), perl(Time::HiRes)
+# Socket is needed to run regression tests
+BuildRequires: perl(Socket)
+
+%if 0%{?el5}
+Requires: libmysqlclient15
+%endif
+
+%if 0%{?el6}
+BuildRequires: perl-Time-HiRes
+Requires: libmysqlclient16
+%endif
 
 Requires: grep, fileutils
 Requires: %{name}-libs = %{version}-%{release}
@@ -110,7 +119,7 @@ Requires(preun): chkconfig
 Requires(preun): initscripts
 Requires(postun): initscripts
 # mysqlhotcopy needs DBI/DBD support
-Requires: perl-DBI, perl-DBD-MySQL, libmysqlclient15
+Requires: perl-DBI, perl-DBD-MySQL
 Conflicts: MySQL-server
 Conflicts: mysql-server < %{basever}
 Provides: mysql-server = %{version}-%{release}
