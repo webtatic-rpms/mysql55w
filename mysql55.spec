@@ -1,3 +1,5 @@
+%global basever 5.5
+
 Name: mysql55
 Version: 5.5.28
 Release: 1%{?dist}
@@ -68,8 +70,8 @@ Requires: bash
 # MySQL (with caps) is upstream's spelling of their own RPMs for mysql
 Conflicts: MySQL
 
-Conflicts: mysql < %{version}
-Provides: mysql = %{version}
+Conflicts: mysql < %{basever}
+Provides: mysql = %{version}-%{release}
 
 # When rpm 4.9 is universal, this could be cleaned up:
 %global __perl_requires %{SOURCE999}
@@ -86,8 +88,8 @@ contains the standard MySQL client programs and generic MySQL files.
 Summary: The shared libraries required for MySQL clients
 Group: Applications/Databases
 Requires: /sbin/ldconfig
-Conflicts: mysql-libs < %{version}
-Provides: mysql-libs = %{version}
+Conflicts: mysql-libs < %{basever}
+Provides: mysql-libs = %{version}-%{release}
 
 %description libs
 The mysql-libs package provides the essential shared libraries for any 
@@ -110,8 +112,8 @@ Requires(postun): initscripts
 # mysqlhotcopy needs DBI/DBD support
 Requires: perl-DBI, perl-DBD-MySQL, libmysqlclient15
 Conflicts: MySQL-server
-Conflicts: mysql-server < %{version}
-Provides: mysql-server = %{version}
+Conflicts: mysql-server < %{basever}
+Provides: mysql-server = %{version}-%{release}
 
 %description server
 MySQL is a multi-user, multi-threaded SQL database server. MySQL is a
@@ -126,8 +128,8 @@ Group: Applications/Databases
 Requires: %{name} = %{version}-%{release}
 Requires: openssl-devel
 Conflicts: MySQL-devel
-Conflicts: mysql-devel < %{version}
-Provides: mysql-devel = %{version}
+Conflicts: mysql-devel < %{basever}
+Provides: mysql-devel = %{version}-%{release}
 
 %description devel
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -138,8 +140,8 @@ developing MySQL client applications.
 
 Summary: MySQL as an embeddable library
 Group: Applications/Databases
-Conflicts: mysql-embedded < %{version}
-Provides: mysql-embedded = %{version}
+Conflicts: mysql-embedded < %{basever}
+Provides: mysql-embedded = %{version}-%{release}
 
 %description embedded
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -152,8 +154,8 @@ Summary: Development files for MySQL as an embeddable library
 Group: Applications/Databases
 Requires: %{name}-embedded = %{version}-%{release}
 Requires: %{name}-devel = %{version}-%{release}
-Conflicts: mysql-embedded-devel < %{version}
-Provides: mysql-embedded-devel = %{version}
+Conflicts: mysql-embedded-devel < %{basever}
+Provides: mysql-embedded-devel = %{version}-%{release}
 
 %description embedded-devel
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -166,8 +168,8 @@ Summary: MySQL benchmark scripts and data
 Group: Applications/Databases
 Requires: %{name} = %{version}-%{release}
 Conflicts: MySQL-bench
-Conflicts: mysql-bench < %{version}
-Provides: mysql-bench = %{version}
+Conflicts: mysql-bench < %{basever}
+Provides: mysql-bench = %{version}-%{release}
 
 %description bench
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -181,8 +183,8 @@ Group: Applications/Databases
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-server = %{version}-%{release}
 Conflicts: MySQL-test
-Conflicts: mysql-test < %{version}
-Provides: mysql-test = %{version}
+Conflicts: mysql-test < %{basever}
+Provides: mysql-test = %{version}-%{release}
 
 %description test
 MySQL is a multi-user, multi-threaded SQL database server. This
