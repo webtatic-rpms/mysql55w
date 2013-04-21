@@ -43,6 +43,7 @@ Patch5: mysql-stack-guard.patch
 Patch6: mysql-chain-certs.patch
 Patch7: mysql-versioning.patch
 Patch8: mysql-dubious-exports.patch
+Patch9: mysql-openssl.patch
 Patch10: mysql-plugin-bool.patch
 Patch11: mysql-s390-tsc.patch
 Patch13: mysqld-nowatch.patch
@@ -211,6 +212,7 @@ the MySQL sources.
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
+%patch9 -p1
 %patch10 -p1
 %patch11 -p1
 %patch13 -p1
@@ -674,6 +676,7 @@ fi
 %changelog
 * Sun Apr 21 2013 Andy Thompson <andy@webtatic.com> 5.5.31-1
 - Update to MySQL 5.5.31
+- Add patch for bug #68999
 
 * Sat Dec 22 2012 Andy Thompson <andy@webtatic.com> 5.5.29-1
 - Update to MySQL 5.5.29
