@@ -2,7 +2,7 @@
 
 Name: mysql55
 Version: 5.5.31
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
@@ -64,13 +64,8 @@ BuildRequires: time procps
 # Socket is needed to run regression tests
 BuildRequires: perl(Socket)
 
-%if 0%{?el5}
-Requires: libmysqlclient15
-%endif
-
 %if 0%{?el6}
 BuildRequires: perl-Time-HiRes
-Requires: libmysqlclient16
 %endif
 
 Requires: grep, fileutils
@@ -98,6 +93,12 @@ contains the standard MySQL client programs and generic MySQL files.
 Summary: The shared libraries required for MySQL clients
 Group: Applications/Databases
 Requires: /sbin/ldconfig
+%if 0%{?el5}
+Requires: libmysqlclient15
+%endif
+%if 0%{?el6}
+Requires: libmysqlclient16
+%endif
 Conflicts: mysql-libs < %{basever}
 Provides: mysql-libs = %{version}-%{release}
 
@@ -112,6 +113,7 @@ MySQL server.
 Summary: The MySQL server and related files
 Group: Applications/Databases
 Requires: %{name} = %{version}-%{release}
+Requires: %{name}-libs = %{version}-%{release}
 Requires: sh-utils
 Requires(pre): /usr/sbin/useradd
 Requires(post): chkconfig
@@ -674,6 +676,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon May 27 2013 Andy Thompson <andy@webtatic.com> 5.5.31-2
+- Move libmysqlclient dependency to mysql55-libs
+
 * Sun Apr 21 2013 Andy Thompson <andy@webtatic.com> 5.5.31-1
 - Update to MySQL 5.5.31
 - Add patch for bug #68999
