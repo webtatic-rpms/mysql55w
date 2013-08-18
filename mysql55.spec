@@ -679,6 +679,11 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Sun Aug 18 2013 Andy Thompson <andy@webtatic.com> 5.5.33-1
+- Update to MySQL 5.5.33
+- Add patch to resolve test
+- Fix mysql user addition on el5
+
 * Mon May 27 2013 Andy Thompson <andy@webtatic.com> 5.5.31-2
 - Move libmysqlclient dependency to mysql55-libs
 
