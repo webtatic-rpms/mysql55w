@@ -1,8 +1,8 @@
 %global basever 5.5
 
 Name: mysql55
-Version: 5.5.31
-Release: 2%{?dist}
+Version: 5.5.33
+Release: 1%{?dist}
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
@@ -422,6 +422,7 @@ rm -f ${RPM_BUILD_ROOT}/usr/INSTALL-BINARY
 rm -f ${RPM_BUILD_ROOT}/usr/docs/ChangeLog
 rm -f ${RPM_BUILD_ROOT}/usr/data/mysql/.empty
 rm -f ${RPM_BUILD_ROOT}/usr/data/test/.empty
+rm -rf ${RPM_BUILD_ROOT}/usr/share/mysql/solaris/
 # should move this to /etc/ ?
 rm -f ${RPM_BUILD_ROOT}%{_bindir}/mysqlaccess.conf
 rm -f ${RPM_BUILD_ROOT}%{_bindir}/mysql_embedded
