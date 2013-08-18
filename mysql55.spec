@@ -54,6 +54,7 @@ Patch17: mysql-plugin-test.patch
 Patch18: mysql-cipherspec.patch
 Patch19: mysql-file-contents.patch
 Patch20: mysql-string-overflow.patch
+Patch22: mysql-innodbwarn.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: perl, readline-devel, openssl-devel
@@ -225,6 +226,7 @@ the MySQL sources.
 %patch18 -p1
 %patch19 -p1
 %patch20 -p1
+%patch22 -p1
 
 # workaround for upstream bug #56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
