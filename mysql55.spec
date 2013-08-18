@@ -455,11 +455,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %pre server
 /usr/sbin/groupadd -g 27 -o -r mysql >/dev/null 2>&1 || :
-%if 0%{?el6}
-/usr/sbin/useradd -M -g mysql -o -r -d /var/lib/mysql -s /bin/bash \
+%if 0%{?fedora} >= 10 || 0%{?rhel} >= 6
+/usr/sbin/useradd -M -N -g mysql -o -r -d /var/lib/mysql -s /bin/bash \
 	-c "MySQL Server" -u 27 mysql >/dev/null 2>&1 || :
 %else
-/usr/sbin/useradd -M -N -g mysql -o -r -d /var/lib/mysql -s /bin/bash \
+/usr/sbin/useradd -M -g mysql -o -r -d /var/lib/mysql -s /bin/bash \
 	-c "MySQL Server" -u 27 mysql >/dev/null 2>&1 || :
 %endif
 
