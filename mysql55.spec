@@ -1,7 +1,7 @@
 %global basever 5.5
 
 Name: mysql55
-Version: 5.5.33
+Version: 5.5.34
 Release: 1%{?dist}
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -679,6 +679,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Sat Oct 26 2013 Andy Thompson <andy@webtatic.com> 5.5.34-1
+- Update to MySQL 5.5.34
+
 * Sun Aug 18 2013 Andy Thompson <andy@webtatic.com> 5.5.33-1
 - Update to MySQL 5.5.33
 - Add patch to resolve test
