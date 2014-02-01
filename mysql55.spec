@@ -13,15 +13,7 @@ License: GPLv2 with exceptions
 # Regression tests take a long time, you can skip 'em with this
 %{!?runselftest:%global runselftest 0}
 
-# Upstream has a mirror redirector for downloads, so the URL is hard to
-# represent statically.  You can get the tarball by following a link from
-# http://dev.mysql.com/downloads/mysql/
-Source0: mysql-%{version}-nodocs.tar.gz
-# The upstream tarball includes non-free documentation that we cannot ship.
-# To remove the non-free documentation, run this script after downloading
-# the tarball into the current directory:
-# ./generate-tarball.sh $VERSION
-Source1: generate-tarball.sh
+Source0: http://dev.mysql.com/get/Downloads/MySQL-5.5/mysql-%{version}.tar.gz
 Source2: mysql.init
 Source3: my.cnf
 Source4: scriptstub.c
@@ -681,6 +673,7 @@ fi
 %changelog
 * Sat Feb 01 2014 Andy Thompson <andy@webtatic.com> 5.5.36-1
 - Update to MySQL 5.5.36
+- Switch to using the Oracle package now incompatible license doc removed
 
 * Sat Oct 26 2013 Andy Thompson <andy@webtatic.com> 5.5.34-1
 - Update to MySQL 5.5.34
