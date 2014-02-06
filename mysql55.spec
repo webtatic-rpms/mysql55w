@@ -62,7 +62,7 @@ BuildRequires: perl-Time-HiRes
 %endif
 
 Requires: grep, fileutils
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 Requires: bash
 
 # MySQL (with caps) is upstream's spelling of their own RPMs for mysql
@@ -70,6 +70,7 @@ Conflicts: MySQL
 
 Conflicts: mysql < %{basever}
 Provides: mysql = %{version}-%{release}
+Provides: mysql%{?_isa} = %{version}-%{release}
 
 %define mysql55_obsoletes() %{expand:
 Obsoletes: mysql55%{?1:-%1} = 5.5.28-1%%{?dist}
@@ -104,6 +105,7 @@ Requires: libmysqlclient16
 %endif
 Conflicts: mysql-libs < %{basever}
 Provides: mysql-libs = %{version}-%{release}
+Provides: mysql-libs%{?_isa} = %{version}-%{release}
 %mysql55_obsoletes libs
 
 %description libs
@@ -116,8 +118,8 @@ MySQL server.
 
 Summary: The MySQL server and related files
 Group: Applications/Databases
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 Requires: sh-utils
 Requires(pre): /usr/sbin/useradd
 Requires(post): chkconfig
@@ -130,6 +132,7 @@ Requires: perl-DBI, perl-DBD-MySQL
 Conflicts: MySQL-server
 Conflicts: mysql-server < %{basever}
 Provides: mysql-server = %{version}-%{release}
+Provides: mysql-server%{?_isa} = %{version}-%{release}
 %mysql55_obsoletes server
 
 %description server
@@ -142,11 +145,12 @@ the MySQL server and some accompanying files and directories.
 
 Summary: Files for development of MySQL applications
 Group: Applications/Databases
-Requires: %{name} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: openssl-devel
 Conflicts: MySQL-devel
 Conflicts: mysql-devel < %{basever}
 Provides: mysql-devel = %{version}-%{release}
+Provides: mysql-devel%{?_isa} = %{version}-%{release}
 %mysql55_obsoletes devel
 
 %description devel
@@ -160,6 +164,7 @@ Summary: MySQL as an embeddable library
 Group: Applications/Databases
 Conflicts: mysql-embedded < %{basever}
 Provides: mysql-embedded = %{version}-%{release}
+Provides: mysql-embedded%{?_isa} = %{version}-%{release}
 %mysql55_obsoletes embedded
 
 %description embedded
@@ -171,10 +176,11 @@ into a client application instead of running as a separate process.
 
 Summary: Development files for MySQL as an embeddable library
 Group: Applications/Databases
-Requires: %{name}-embedded = %{version}-%{release}
-Requires: %{name}-devel = %{version}-%{release}
+Requires: %{name}-embedded%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 Conflicts: mysql-embedded-devel < %{basever}
 Provides: mysql-embedded-devel = %{version}-%{release}
+Provides: mysql-embedded-devel%{?_isa} = %{version}-%{release}
 %mysql55_obsoletes embedded-devel
 
 %description embedded-devel
@@ -186,10 +192,11 @@ the embedded version of the MySQL server.
 
 Summary: MySQL benchmark scripts and data
 Group: Applications/Databases
-Requires: %{name} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 Conflicts: MySQL-bench
 Conflicts: mysql-bench < %{basever}
 Provides: mysql-bench = %{version}-%{release}
+Provides: mysql-bench%{?_isa} = %{version}-%{release}
 %mysql55_obsoletes bench
 
 %description bench
@@ -201,11 +208,12 @@ MySQL.
 
 Summary: The test suite distributed with MySQL
 Group: Applications/Databases
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-server = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: %{name}-server%{?_isa} = %{version}-%{release}
 Conflicts: MySQL-test
 Conflicts: mysql-test < %{basever}
 Provides: mysql-test = %{version}-%{release}
+Provides: mysql-test%{?_isa} = %{version}-%{release}
 %mysql55_obsoletes test
 
 %description test
@@ -704,6 +712,7 @@ fi
 %changelog
 * Thu Feb 06 2014 Andy Thompson <andy@webtatic.com> 5.5.36-2
 - Rename package to mysql55w to avoid conflicting with mysql55 scl packages
+- Add Instruction Set Architecture Provides and Requires
 
 * Sat Feb 01 2014 Andy Thompson <andy@webtatic.com> 5.5.36-1
 - Update to MySQL 5.5.36
