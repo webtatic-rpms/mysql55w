@@ -2,7 +2,7 @@
 
 Name: mysql55w
 Version: 5.5.36
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
@@ -515,8 +515,16 @@ fi
 if /sbin/service mysqld status >/dev/null 2>&1 ; then
   touch %{_localstatedir}/lib/mysql/mysqld_replace_restart_needed
 fi
+# record the current runlevel positions of mysqld SysV script
+find -L /etc/rc.d/rc[0-6].d -samefile /etc/rc.d/init.d/mysqld  > %{_localstatedir}/lib/mysql/mysqld_replace_runlevels
 
 %triggerpostun server -- mysql55-server
+if [ -e %{_localstatedir}/lib/mysql/mysqld_replace_runlevels ]; then
+  # restore the original runlevel positions of the mysqld SysV script
+  cat %{_localstatedir}/lib/mysql/mysqld_replace_runlevels | xargs -I {} ln -s ../init.d/mysqld {}
+  rm %{_localstatedir}/lib/mysql/mysqld_replace_runlevels
+fi
+
 if [ -e %{_localstatedir}/lib/mysql/mysqld_replace_restart_needed ]; then
   rm %{_localstatedir}/lib/mysql/mysqld_replace_restart_needed
   # mysqld was running before the mysql55-server package was removed, so start it again
@@ -710,6 +718,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Thu Feb 13 2014 Andy Thompson <andy@webtatic.com> 5.5.36-3
+- Preserve the SysV init script runlevel positions on mysql55->mysql55w upgrade
+
 * Thu Feb 06 2014 Andy Thompson <andy@webtatic.com> 5.5.36-2
 - Rename package to mysql55w to avoid conflicting with mysql55 scl packages
 - Add Instruction Set Architecture Provides and Requires
