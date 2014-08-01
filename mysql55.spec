@@ -318,7 +318,7 @@ ar -x ../libmysqld.a
 # these result in missing dependencies: (filed upstream as bug 59104)
 rm -f sql_binlog.cc.o rpl_utility.cc.o
 gcc $CFLAGS $LDFLAGS -shared -Wl,-soname,libmysqld.so.0 -o libmysqld.so.0.0.1 \
-	*.o ../../probes_mysql.o \
+	*.o \
 	-lpthread -laio -lcrypt -lssl -lcrypto -lz -lrt -lstdc++ -ldl -lm -lc
 # this is to check that we built a complete library
 cp %{SOURCE9} .
@@ -720,6 +720,7 @@ fi
 %changelog
 * Fri Aug 01 2014 Andy Thompson <andy@webtatic.com> 5.5.39-1
 - Update to MySQL 5.5.39
+- Remove now internally included probes_mysql.so
 
 * Sat Jun 29 2014 Andy Thompson <andy@webtatic.com> 5.5.38-1
 - Update to MySQL 5.5.38
