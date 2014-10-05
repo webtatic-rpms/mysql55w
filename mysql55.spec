@@ -725,7 +725,7 @@ fi
 - Update to MySQL 5.5.39
 - Remove now internally included probes_mysql.so
 
-* Sat Jun 29 2014 Andy Thompson <andy@webtatic.com> 5.5.38-1
+* Sat Jun 28 2014 Andy Thompson <andy@webtatic.com> 5.5.38-1
 - Update to MySQL 5.5.38
 
 * Sat Mar 29 2014 Andy Thompson <andy@webtatic.com> 5.5.37-1
