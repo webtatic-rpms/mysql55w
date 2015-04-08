@@ -30,7 +30,6 @@ Source999: filter-requires-mysql.sh
 Patch1: mysql-errno.patch
 Patch2: mysql-strmov.patch
 Patch3: mysql-install-test.patch
-Patch4: mysql-expired-certs.patch
 Patch5: mysql-stack-guard.patch
 Patch6: mysql-chain-certs.patch
 Patch7: mysql-versioning.patch
@@ -227,7 +226,6 @@ the MySQL sources.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-%patch4 -p1
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
@@ -720,6 +718,7 @@ fi
 %changelog
 * Wed Apr 08 2015 Andy Thompson <andy@webtatic.com> 5.5.43-1
 - Update to MySQL 5.5.43
+- Remove upstream fixed expired-certs patch
 
 * Sun Oct 05 2014 Andy Thompson <andy@webtatic.com> 5.5.40-1
 - Update to MySQL 5.5.40
