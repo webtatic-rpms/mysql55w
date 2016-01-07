@@ -1,0 +1,8 @@
+name: mysql55w
+builds:
+  webtatic-el6:
+    target: el6-development
+    arch: [x86_64, i386]
+  webtatic-el5:
+    target: el5-development
+    arch: [x86_64, i386]
