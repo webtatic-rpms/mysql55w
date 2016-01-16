@@ -13,7 +13,7 @@ License: GPLv2 with exceptions
 # Regression tests take a long time, you can skip 'em with this
 %{!?runselftest:%global runselftest 0}
 
-Source0: http://dev.mysql.com/get/Downloads/MySQL-5.5/mysql-%{version}.tar.gz
+Source0: https://dev.mysql.com/get/Downloads/MySQL-5.5/mysql-%{version}.tar.gz
 Source2: mysql.init
 Source3: my.cnf
 Source4: scriptstub.c
