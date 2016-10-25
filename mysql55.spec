@@ -2,7 +2,7 @@
 
 Name: mysql55w
 Version: 5.5.53
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
@@ -393,6 +393,8 @@ install -m 644 Docs/INFO_BIN ${RPM_BUILD_ROOT}%{_libdir}/mysql/
 mkdir -p $RPM_BUILD_ROOT/var/log
 touch $RPM_BUILD_ROOT/var/log/mysqld.log
 
+mkdir -p $RPM_BUILD_ROOT/var/lib/mysql-files
+
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
 mkdir -p $RPM_BUILD_ROOT/var/run/mysqld
 install -m 0755 -d $RPM_BUILD_ROOT/var/lib/mysql
@@ -678,6 +680,7 @@ fi
 /etc/rc.d/init.d/mysqld
 %attr(0755,mysql,mysql) %dir /var/run/mysqld
 %attr(0755,mysql,mysql) %dir /var/lib/mysql
+%attr(0755,mysql,mysql) %dir /var/lib/mysql-files
 %attr(0640,mysql,mysql) %config(noreplace) %verify(not md5 size mtime) /var/log/mysqld.log
 %config(noreplace) %{_sysconfdir}/logrotate.d/mysqld
 
@@ -714,6 +717,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Oct 25 2016 Andy Thompson <andy@webtatic.com> 5.5.53-2
+- Add /var/lib/mysql-files
+
 * Sun Oct 16 2016 Andy Thompson <andy@webtatic.com> 5.5.53-1
 - Update to MySQL 5.5.53
 
