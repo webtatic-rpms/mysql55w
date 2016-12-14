@@ -1,8 +1,8 @@
 %global basever 5.5
 
 Name: mysql55w
-Version: 5.5.53
-Release: 2%{?dist}
+Version: 5.5.54
+Release: 1%{?dist}
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
@@ -717,6 +717,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Wed Dec 14 2016 Andy Thompson <andy@webtatic.com> 5.5.54-1
+- Update to MySQL 5.5.54
+
 * Tue Oct 25 2016 Andy Thompson <andy@webtatic.com> 5.5.53-2
 - Add /var/lib/mysql-files
 
