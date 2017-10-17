@@ -1,7 +1,7 @@
 %global basever 5.5
 
 Name: mysql55w
-Version: 5.5.57
+Version: 5.5.58
 Release: 1%{?dist}
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -717,6 +717,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Oct 17 2017 Andy Thompson <andy@webtatic.com> 5.5.58-1
+- Update to MySQL 5.5.58
+
 * Sun Aug 06 2017 Andy Thompson <andy@webtatic.com> 5.5.57-1
 - Update to MySQL 5.5.57
 
