@@ -8,7 +8,7 @@ Group: Applications/Databases
 URL: http://www.mysql.com
 # exceptions allow client libraries to be linked with most open source SW,
 # not only GPL code.  See README.mysql-license
-License: GPLv2 with exceptions
+License: GPLv2 with exceptions, and BSD
 
 # Regression tests take a long time, you can skip 'em with this
 %{!?runselftest:%global runselftest 0}
@@ -450,8 +450,6 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/ndb-config-2-node.ini
 rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/mysql.server
 rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/mysqld_multi.server
 rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/comp_err.1*
-rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/mysql-stress-test.pl.1*
-rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/mysql-test-run.pl.1*
 
 # put logrotate script where it needs to be
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
@@ -534,6 +532,7 @@ fi
 %defattr(-,root,root)
 %doc README COPYING README.mysql-license
 %doc README.mysql-docs
+%doc storage/innobase/COPYING.Percona storage/innobase/COPYING.Google
 
 %{_bindir}/msql2mysql
 %{_bindir}/mysql
@@ -566,6 +565,8 @@ fi
 %files libs
 %defattr(-,root,root)
 %doc README COPYING README.mysql-license
+%doc storage/innobase/COPYING.Percona storage/innobase/COPYING.Google
+
 # although the default my.cnf contains only server settings, we put it in the
 # libs package because it can be used for client settings too.
 %config(noreplace) /etc/my.cnf
@@ -660,7 +661,6 @@ fi
 %{_mandir}/man1/mysqlimport.1*
 %{_mandir}/man1/mysqlman.1*
 %{_mandir}/man1/mysql_setpermission.1*
-%{_mandir}/man1/mysqltest.1*
 %{_mandir}/man1/innochecksum.1*
 %{_mandir}/man1/perror.1*
 %{_mandir}/man1/replace.1*
@@ -694,6 +694,7 @@ fi
 %files embedded
 %defattr(-,root,root)
 %doc README COPYING README.mysql-license
+%doc storage/innobase/COPYING.Percona storage/innobase/COPYING.Google
 %{_libdir}/mysql/libmysqld.so.*
 
 %files embedded-devel
@@ -701,8 +702,6 @@ fi
 %{_libdir}/mysql/libmysqld.so
 %{_bindir}/mysql_client_test_embedded
 %{_bindir}/mysqltest_embedded
-%{_mandir}/man1/mysql_client_test_embedded.1*
-%{_mandir}/man1/mysqltest_embedded.1*
 
 %files bench
 %defattr(-,root,root)
@@ -714,11 +713,10 @@ fi
 %{_bindir}/my_safe_process
 %attr(-,mysql,mysql) %{_datadir}/mysql-test
 
-%{_mandir}/man1/mysql_client_test.1*
-
 %changelog
 * Sat Dec 15 2018 Andy Thompson <andy@webtatic.com> 5.5.62-1
 - Update to MySQL 5.5.62
+- Update license and un-reference deleted test manpages and library includes
 
 * Sun Feb 04 2018 Andy Thompson <andy@webtatic.com> 5.5.59-1
 - Update to MySQL 5.5.59
